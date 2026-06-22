@@ -1,0 +1,44 @@
+lerobot_src: /home/mumu/lerobot/src
+ports:
+  leader: /dev/ttyACM1
+  follower: /dev/ttyACM0
+robot:
+  id: so101_follower
+  max_relative_target: null
+  use_degrees: true
+teleop:
+  id: so101_leader
+  use_degrees: true
+cameras:
+  front:
+    index_or_path: /dev/video0
+    width: 640
+    height: 480
+    fps: 30
+teleop_loop:
+  fps: 60
+  display_data: false
+webui:
+  host: 0.0.0.0
+  port: 8000
+  poll_fps: 30
+  jpeg_quality: 80
+bridge:
+  address: tcp://127.0.0.1:5555
+  command_address: tcp://127.0.0.1:5556
+  publish_fps: 30
+record:
+  repo_id: your_hf_username/so101_demo
+  single_task: pick up the object and place it in the bin
+  num_episodes: 10
+  episode_time_s: 60
+  reset_time_s: 10
+  fps: 30
+  display_data: false
+  play_sounds: true
+  root: /home/mumu/projects/lerobot-so101-app/data/so101_demo
+  push_to_hub: false
+  private: false
+  tags: null
+  streaming_encoding: true
+  encoder_threads: 2

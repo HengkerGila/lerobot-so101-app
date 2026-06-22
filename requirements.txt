@@ -1,0 +1,31 @@
+# =============================================================================
+# SO-101 LeRobot — teleoperation, data logging & web monitor
+# =============================================================================
+# Install everything with:
+#     pip install -r requirements.txt
+#
+# This pulls LeRobot from PyPI with the extras the SO-101 needs. If instead you
+# want to use a local LeRobot source checkout, set `lerobot_src` in
+# configs/config.yaml to its src/ path (the scripts add it to sys.path) — you
+# still need this file's dependencies installed.
+# =============================================================================
+
+# --- LeRobot + extras --------------------------------------------------------
+#   hardware : pyserial / pynput (serial bus + keyboard listener)
+#   feetech  : feetech-servo-sdk — the SO-101's Feetech STS servo driver
+#   dataset  : datasets / pandas / pyarrow / torchcodec (record + replay)
+# Also pulls torch, numpy and opencv-python-headless (cv2) as base deps.
+lerobot[hardware,feetech,dataset]==0.5.2
+
+# --- Web monitor / app (scripts/monitor.py, scripts/app.py) -----------------
+fastapi>=0.115
+uvicorn[standard]>=0.30
+
+# --- Bridge between teleop and app (scripts/bridge.py) ----------------------
+pyzmq>=25
+
+# --- Config loading (scripts/_config.py) ------------------------------------
+PyYAML>=6.0
+
+# NOTE: do NOT add `opencv-python` here — LeRobot installs
+# `opencv-python-headless`, and having both causes import conflicts.
