@@ -2,20 +2,21 @@
 # SO-101 LeRobot — teleoperation, data logging & web monitor
 # =============================================================================
 # Install everything with:
-#     pip install -r requirements.txt
+#     make install            # LeRobot (from config.yaml) + the deps below
 #
-# This pulls LeRobot from PyPI with the extras the SO-101 needs. If instead you
-# want to use a local LeRobot source checkout, set `lerobot_src` in
-# configs/config.yaml to its src/ path (the scripts add it to sys.path) — you
-# still need this file's dependencies installed.
+# This file lists only the PyPI deps for the web app, bridge and config loader.
+# LeRobot itself is NOT listed here: the project targets 0.5.2 (never published
+# to PyPI), so it is installed editable from your local checkout. `make install`
+# reads that checkout path from a SINGLE source — `lerobot_src` in
+# configs/config.yaml — and installs `<checkout>[hardware,feetech,dataset]`
+# before installing this file. Set the path once in config.yaml; nothing here.
+#
+#   hardware : pyserial / pynput      feetech : feetech-servo-sdk
+#   dataset  : datasets / pandas / pyarrow / torchcodec
+#   (LeRobot also pulls torch, numpy and opencv-python-headless)
+#
+# `pip install -r requirements.txt` alone installs the PyPI deps WITHOUT LeRobot.
 # =============================================================================
-
-# --- LeRobot + extras --------------------------------------------------------
-#   hardware : pyserial / pynput (serial bus + keyboard listener)
-#   feetech  : feetech-servo-sdk — the SO-101's Feetech STS servo driver
-#   dataset  : datasets / pandas / pyarrow / torchcodec (record + replay)
-# Also pulls torch, numpy and opencv-python-headless (cv2) as base deps.
-lerobot[hardware,feetech,dataset]==0.5.2
 
 # --- Web monitor / app (scripts/monitor.py, scripts/app.py) -----------------
 fastapi>=0.115

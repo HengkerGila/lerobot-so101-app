@@ -1,4 +1,4 @@
-lerobot_src: /home/mumu/lerobot/src
+lerobot_src: /path/to/lerobot/src   # placeholder: your LeRobot checkout's src/ dir
 ports:
   leader: /dev/ttyACM1
   follower: /dev/ttyACM0
@@ -36,7 +36,7 @@ record:
   fps: 30
   display_data: false
   play_sounds: true
-  root: /home/mumu/projects/lerobot-so101-app/data/so101_demo
+  root: data/so101_demo   # placeholder: relative to the repo root, or set an absolute path
   push_to_hub: false
   private: false
   tags: null

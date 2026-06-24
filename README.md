@@ -100,10 +100,47 @@ how the data is read back — are in
 | `scripts/upload_dataset.py` | Push a dataset to the HuggingFace Hub |
 | `scripts/dashboard.py`, `scripts/bridge.py`, `scripts/_config.py` | Shared internals (web UI, ZMQ bridge, config loader) |
 
+## Installation
+
+This project targets **LeRobot 0.5.2**, which was never published to PyPI (PyPI
+tops out at 0.5.1). You therefore need a **local LeRobot source checkout**, which
+`make install` installs in editable mode. The path to that checkout is set in
+**one place — `lerobot_src` in `configs/config.yaml`** — and nowhere else:
+
+```bash
+# 1. Clone LeRobot somewhere
+git clone https://github.com/huggingface/lerobot.git /path/to/lerobot
+
+# 2. Set lerobot_src in configs/config.yaml to that checkout's src/ dir, e.g.
+#    lerobot_src: /path/to/lerobot/src
+
+# 3. Create the .venv and install all dependencies (LeRobot + web app + bridge)
+make install
+```
+
+`make install` reads `lerobot_src` from `config.yaml`, then installs:
+
+- `<checkout>[hardware,feetech,dataset]` (editable) — LeRobot 0.5.2 plus the
+  SO-101 extras (`hardware` → pyserial/pynput, `feetech` → the servo SDK,
+  `dataset` → datasets/pandas/pyarrow/torchcodec). This also pulls in torch,
+  numpy and `opencv-python-headless`.
+- everything in `requirements.txt`: `fastapi` + `uvicorn` (web monitor / app),
+  `pyzmq` (the teleop↔app bridge) and `PyYAML` (the config loader).
+
+So to point at a different checkout, you only edit `lerobot_src` in
+`config.yaml` — the Makefile derives the editable-install path from it. Verify:
+
+```bash
+.venv/bin/python -c "import lerobot; print(lerobot.__version__)"   # 0.5.2
+```
+
+> Do **not** add `opencv-python` to `requirements.txt` — LeRobot installs
+> `opencv-python-headless`, and having both causes import conflicts.
+
 ## Quick start
 
 ```bash
-make install                              # create .venv + install deps
+make install                              # create .venv + install deps (see above)
 make port-leader port-follower cameras    # detect hardware → config (once)
 make calibrate-leader calibrate-follower  # calibrate both arms (once)
 

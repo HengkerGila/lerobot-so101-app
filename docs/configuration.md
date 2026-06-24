@@ -11,11 +11,14 @@ Python path, and builds the typed LeRobot config objects the scripts consume.
 ## `lerobot_src`
 
 ```yaml
-lerobot_src: /home/mumu/lerobot/src
+lerobot_src: /path/to/lerobot/src
 ```
 
-Path to the LeRobot source checkout, added to `sys.path` before any `lerobot`
-import. Change only if you move the checkout.
+Path to the LeRobot source checkout's `src/` dir. This is the **single source**
+for the checkout location: it is added to `sys.path` before any `lerobot` import,
+**and** `make install` derives the checkout root from it (the parent dir) to run
+the editable `pip install <checkout>[hardware,feetech,dataset]`. Change it here
+and nowhere else if you move the checkout.
 
 ## `ports`
 
@@ -153,7 +156,7 @@ record:
   fps: 30
   display_data: false
   play_sounds: true
-  root: /home/mumu/projects/ttt/data/so101_demo
+  root: data/so101_demo   # relative to the repo root, or an absolute path
   push_to_hub: false
   private: false
   tags: null

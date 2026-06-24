@@ -51,6 +51,18 @@ def load(path: str | Path | None = None) -> dict[str, Any]:
     return cfg
 
 
+def lerobot_checkout_root(cfg: dict[str, Any]) -> str | None:
+    """Return the LeRobot checkout root (the dir holding ``pyproject.toml``).
+
+    Derived from ``lerobot_src`` (which points at ``<root>/src``) so that
+    ``configs/config.yaml`` is the single place defining where LeRobot lives —
+    used both for ``sys.path`` here and for the editable ``pip install`` that
+    ``make install`` runs.
+    """
+    src = cfg.get("lerobot_src")
+    return str(Path(src).resolve().parent) if src else None
+
+
 def build_camera_configs(cfg: dict[str, Any]) -> dict[str, Any]:
     """Build ``{name: OpenCVCameraConfig}`` from the ``cameras`` section."""
     from lerobot.cameras.opencv import OpenCVCameraConfig
@@ -112,3 +124,21 @@ def build_dataset_config(cfg: dict[str, Any]):
         streaming_encoding=rec.get("streaming_encoding", True),
         encoder_threads=rec.get("encoder_threads", 2),
     )
+
+
+if __name__ == "__main__":
+    # Tiny CLI used by `make install`:
+    #   python scripts/_config.py lerobot-root  -> prints the checkout dir
+    # so the LeRobot path is defined only in configs/config.yaml. Only needs
+    # PyYAML (no lerobot import), so it runs before lerobot is installed.
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Read paths from config.yaml")
+    parser.add_argument("key", choices=["lerobot-root"])
+    args = parser.parse_args()
+
+    if args.key == "lerobot-root":
+        root = lerobot_checkout_root(load())
+        if not root:
+            raise SystemExit("lerobot_src is not set in configs/config.yaml")
+        print(root)

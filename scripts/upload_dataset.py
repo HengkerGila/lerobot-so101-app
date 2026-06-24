@@ -12,7 +12,7 @@ Usage:
 
     # Override the local dir and repo id
     python scripts/upload_dataset.py \
-        --local_dir /home/mumu/projects/ttt/data/my_dataset \
+        --local_dir /path/to/data/my_dataset \
         --repo_id your_hf_username/so101_demo
 
 Requires (run once):

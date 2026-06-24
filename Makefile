@@ -15,8 +15,11 @@ help:  ## Show this help
 		| awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 # --- setup -------------------------------------------------------------------
-install:  ## Create .venv and install dependencies
-	python -m venv .venv && $(PY) -m pip install -r requirements.txt
+install:  ## Create .venv and install dependencies (LeRobot path from config.yaml)
+	python -m venv .venv
+	$(PY) -m pip install --quiet PyYAML
+	$(PY) -m pip install -e "$$($(PY) scripts/_config.py lerobot-root)[hardware,feetech,dataset]"
+	$(PY) -m pip install -r requirements.txt
 
 find:  ## List detected serial ports and cameras (no changes)
 	$(PY) scripts/find_hardware.py

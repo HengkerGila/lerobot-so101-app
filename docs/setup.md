@@ -2,20 +2,28 @@
 
 ## 1. Install
 
+This project targets **LeRobot 0.5.2**, which is not on PyPI (latest there is
+0.5.1), so it is installed from a **local source checkout** in editable mode.
+Clone LeRobot, set its path in `config.yaml`, then install:
+
 ```bash
-make install        # creates .venv and installs requirements.txt
+git clone https://github.com/huggingface/lerobot.git /path/to/lerobot
+# set lerobot_src: /path/to/lerobot/src in configs/config.yaml
+make install        # creates .venv, installs LeRobot + requirements.txt
 ```
 
-This pulls LeRobot (extras: `hardware`, `feetech`, `dataset`) plus the web app
-deps (`fastapi`, `uvicorn`, `pyzmq`) and `PyYAML`. Verify:
+`make install` reads `lerobot_src` from `config.yaml` and installs
+`<checkout>[hardware,feetech,dataset]` editable (LeRobot 0.5.2 + the SO-101
+extras `hardware`, `feetech`, `dataset`), then the web app deps from
+`requirements.txt` (`fastapi`, `uvicorn`, `pyzmq`) and `PyYAML`. Verify:
 
 ```bash
 .venv/bin/python -c "import lerobot; print(lerobot.__version__)"   # 0.5.2
 ```
 
-**Local LeRobot checkout (optional):** to run against a clone, point
-`lerobot_src` in `config.yaml` at its `src/` dir (the scripts prepend it to
-`sys.path`); set it to `null` to use the pip-installed package.
+The checkout path lives in **one place** — `lerobot_src` in `config.yaml` (the
+scripts also prepend it to `sys.path`). Change it there to use a different
+checkout; nothing else references the path.
 
 ## 2. Plug in the arms
 
