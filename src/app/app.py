@@ -37,11 +37,11 @@ from __future__ import annotations
 
 import threading
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 
-import bridge
+import modules.bridge as bridge
 import dashboard
 
 from lerobot.robots import make_robot_from_config
@@ -101,7 +101,6 @@ def main():
     finally:
         command_client.close()
         subscriber.stop()
-
 
 if __name__ == "__main__":
     main()

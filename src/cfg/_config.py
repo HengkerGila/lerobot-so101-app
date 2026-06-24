@@ -24,7 +24,7 @@ from typing import Any
 import yaml
 
 # Repo layout:  <repo>/scripts/_config.py  ->  <repo>/configs/config.yaml
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_CONFIG_PATH = REPO_ROOT / "configs" / "config.yaml"
 
 
@@ -47,6 +47,8 @@ def load(path: str | Path | None = None) -> dict[str, Any]:
     lerobot_src = cfg.get("lerobot_src")
     if lerobot_src and lerobot_src not in sys.path:
         sys.path.insert(0, lerobot_src)
+    if not lerobot_src and lerobot_src not in sys.path:
+        sys.path.insert(0, Path(__file__).parent / "lerobot" / "src")  # fallback for dev
 
     return cfg
 
@@ -60,6 +62,8 @@ def lerobot_checkout_root(cfg: dict[str, Any]) -> str | None:
     ``make install`` runs.
     """
     src = cfg.get("lerobot_src")
+    if not src:
+        src = Path(__file__).parent / "lerobot" / "src"
     return str(Path(src).resolve().parent) if src else None
 
 
@@ -140,5 +144,5 @@ if __name__ == "__main__":
     if args.key == "lerobot-root":
         root = lerobot_checkout_root(load())
         if not root:
-            raise SystemExit("lerobot_src is not set in configs/config.yaml")
+            print("lerobot_src is not set in configs/config.yaml")
         print(root)

@@ -1,12 +1,12 @@
 # Usage
 
 All commands read `configs/config.yaml` (see [configuration.md](configuration.md)).
-Each `make` target just runs the matching script in `.venv` — use either form.
+Each `make` target runs the matching script in the `scripts/` directory — use either form.
 
 ## Teleoperation
 
 ```bash
-make teleop          # or: python scripts/teleop.py
+make teleop          # or: ./scripts/teleop.sh
 ```
 
 Move the leader arm to drive the follower. **Ctrl+C** to stop (torque is
@@ -17,7 +17,7 @@ values and open the Rerun viewer. Use teleop to confirm the arms move together
 ## Recording a dataset
 
 ```bash
-make record          # or: python scripts/record.py
+make record          # or: ./scripts/record.sh
 ```
 
 Set these under `record:` in the config first:
@@ -53,7 +53,7 @@ make upload                       # uses record.root / record.repo_id
 Override the defaults if needed:
 
 ```bash
-python scripts/upload_dataset.py --local_dir data/so101_demo --repo_id you/so101_demo
+./scripts/upload.sh --local_dir data/so101_demo --repo_id you/so101_demo
 ```
 
 ## Live monitoring

@@ -27,11 +27,11 @@ from __future__ import annotations
 
 import threading
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 
-import dashboard
+import src.app.dashboard as dashboard
 
 from lerobot.robots import make_robot_from_config
 from lerobot.utils.import_utils import register_third_party_plugins

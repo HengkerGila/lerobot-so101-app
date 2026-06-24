@@ -31,7 +31,7 @@ is the web application, and the second-hand path is the ZMQ bridge.
    └───────────┘   └────────────┘   └────────┬─────────┘   └─────┬─────┘                  │
    leader→follower  lerobot record  idle/teleop/recording   standalone view               │
                                               │                   │                        │
-                                     ZMQ bridge (scripts/bridge.py)                        │
+                                     ZMQ bridge (src/modules/bridge.py)                    │
                                      obs stream  +  command channel                        │
                                               │                   │ (in-process StateBuffer)│
                                               ▼                   ▼                        │
@@ -57,7 +57,7 @@ Pick exactly one hardware owner. Running two at once triggers the conflict above
 
 ## Configuration & module layout
 
-Every script begins the same way (`scripts/_config.py`):
+Every script begins the same way (`src/cfg/_config.py`):
 
 ```python
 import _config
@@ -78,16 +78,16 @@ any `lerobot` import. `_config.py` also builds the typed LeRobot config objects:
 
 Shared, hardware-free modules:
 
-- **`dashboard.py`** — the web UI: a thread-safe `StateBuffer` plus a FastAPI app
+- **`src/app/dashboard.py`** — the web UI: a thread-safe `StateBuffer` plus a FastAPI app
   that serves a *view* of it. Owns no hardware. Used by `monitor.py`,
   `teleop.py --dashboard`, and `app.py`.
-- **`bridge.py`** — the ZMQ transport: `Publisher`/`Subscriber` (observation
+- **`src/modules/bridge.py`** — the ZMQ transport: `Publisher`/`Subscriber` (observation
   stream) and `CommandServer`/`CommandClient` (command channel).
-- **`_config.py`** — the loader and config builders above.
+- **`src/cfg/_config.py`** — the loader and config builders above.
 
 ## The ZMQ bridge
 
-The bridge (`scripts/bridge.py`) decouples the hardware owner from the app over
+The bridge (`src/modules/bridge.py`) decouples the hardware owner from the app over
 two independent ZMQ channels, both configured under `bridge:` in the config.
 
 ### Channel 1 — observation stream (PUB / SUB)

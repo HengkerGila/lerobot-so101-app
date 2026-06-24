@@ -160,10 +160,10 @@ statistics. It's first-class in pandas, PyArrow, Polars, DuckDB, and HuggingFace
   `you/so101_demo_20260622_201500`. This keeps `repo_id` unique on the Hub and
   the folder unique on disk.
 - The session server does **not** upload automatically. After a session, push
-  with `make upload` (`scripts/upload_dataset.py`), which reads `record.repo_id` /
+  with `make upload` (`src/modules/upload_dataset.py` or `./scripts/upload.sh`), which reads `record.repo_id` /
   `record.root` (override with `--repo_id` / `--local_dir`). Authenticate once
   with `huggingface-cli login`.
-- `record.py` (the standalone recorder) *can* auto-push if `record.push_to_hub:
+- `src/modules/record.py` (the standalone recorder) *can* auto-push if `record.push_to_hub:
   true`.
 
 ## Reading the data back

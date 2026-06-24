@@ -26,7 +26,7 @@ import argparse
 import logging
 import time
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 
@@ -105,7 +105,7 @@ def main():
     publisher = None
 
     if args.dashboard:
-        import dashboard
+        import src.app.dashboard as dashboard
 
         webui = cfg.get("webui") or {}
         host = webui.get("host", "0.0.0.0")
@@ -123,7 +123,7 @@ def main():
         logging.info("Dashboard at http://%s:%d", host, port)
 
     if args.bridge:
-        import bridge
+        import modules.bridge as bridge
 
         br = cfg.get("bridge") or {}
         address = br.get("address", "tcp://127.0.0.1:5555")

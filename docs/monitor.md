@@ -23,11 +23,11 @@ another process releases the hardware.
 
 ## How it works
 
-`scripts/dashboard.py` owns no hardware — it holds a thread-safe `StateBuffer`
+`src/app/dashboard.py` owns no hardware — it holds a thread-safe `StateBuffer`
 (latest joints + frames + status) and a FastAPI app that serves a view of it.
 Whoever owns the hardware feeds the buffer: `monitor.py` polls it directly,
 `teleop.py --dashboard` feeds it from the teleop loop, and `app.py` fills it from
-the ZMQ bridge (`scripts/bridge.py`). Endpoints: `/stream/<camera>` (MJPEG),
+the ZMQ bridge (`src/modules/bridge.py`). Endpoints: `/stream/<camera>` (MJPEG),
 `/api/events` (Server-Sent Events — live state pushed ~30×/s), `/api/state`
 (one-shot JSON), `/api/config`, and `/api/command` (session control).
 

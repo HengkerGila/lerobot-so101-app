@@ -26,7 +26,7 @@ from pathlib import Path
 
 import yaml
 
-import _config  # noqa: E402  (sets up sys.path)
+from cfg import _config  # noqa: E402  (sets up sys.path)
 
 
 def list_serial_ports() -> list[str]:

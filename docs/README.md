@@ -20,7 +20,5 @@ high-level overview of what the project is and what it records, see the
 
 - Everything is driven by **`configs/config.yaml`** — the scripts are never
   edited. See [configuration.md](configuration.md).
-- Every workflow has a **`make`** shortcut (`make help`); each just runs the
-  matching script in `.venv`.
-- All scripts share a loader (`scripts/_config.py`) that reads the YAML and puts
-  LeRobot on `sys.path` before importing it.
+- Every workflow has a **`make`** shortcut (`make help`); each delegates to the corresponding running script in `scripts/`.
+- All Python scripts share a config loader (`src/cfg/_config.py`) that reads the YAML and configures paths.

@@ -39,11 +39,11 @@ import time
 from copy import deepcopy
 from datetime import datetime
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 
-import bridge
+import modules.bridge as bridge
 
 from lerobot.datasets import (
     LeRobotDataset,
@@ -104,6 +104,7 @@ class SessionServer:
         self._vem: VideoEncodingManager | None = None
         self._task: str = ""
         self._last_obs: dict = {}
+        self._waiting_until: float = 0.0
 
         # Command queue: (cmd_dict, Event, result_holder) executed in main loop.
         self._cmd_queue: "queue.Queue" = queue.Queue()
@@ -169,13 +170,15 @@ class SessionServer:
             if self._mode == RECORDING:
                 return {"ok": False, "error": "already recording"}
             self._start_recording(cmd)
-        elif name in ("save_episode", "discard_episode", "stop_recording"):
+        elif name in ("save_episode", "discard_episode", "stop_recording", "resume_recording"):
             if self._mode != RECORDING:
                 return {"ok": False, "error": "not recording"}
             if name == "save_episode":
                 self._save_episode()
             elif name == "discard_episode":
                 self._discard_episode()
+            elif name == "resume_recording":
+                self._resume_recording()
             else:
                 self._stop_recording()
         else:
@@ -237,6 +240,8 @@ class SessionServer:
                 "num_episodes": num_episodes,
                 "episode_frames": 0,
                 "saving": False,
+                "waiting": False,
+                "resume_in": 0.0,
             },
         )
         logging.info("Recording started: %s (target %d episodes)", repo_id, num_episodes)
@@ -249,7 +254,17 @@ class SessionServer:
             self._recording["episodes_saved"] += 1
             self._recording["episode_frames"] = 0
             self._recording["saving"] = False
+            self._recording["waiting"] = True
+            self._recording["resume_in"] = 20.0
+        self._waiting_until = time.time() + 20.0
         logging.info("Saved episode (%d total)", self._recording["episodes_saved"])
+
+    def _resume_recording(self) -> None:
+        with self._status_lock:
+            if self._recording is not None and self._recording.get("waiting", False):
+                self._recording["waiting"] = False
+                self._recording["resume_in"] = 0.0
+                logging.info("Resumed recording episode %d", self._recording["episodes_saved"] + 1)
 
     def _discard_episode(self) -> None:
         self._dataset.clear_episode_buffer()
@@ -295,15 +310,27 @@ class SessionServer:
                     self.robot.send_action(robot_action)
 
                     if mode == RECORDING and self._dataset is not None:
-                        obs_proc = robot_observation_processor(obs)
-                        obs_frame = build_dataset_frame(self._dataset.features, obs_proc, prefix=OBS_STR)
-                        act_frame = build_dataset_frame(self._dataset.features, teleop_action, prefix=ACTION)
-                        self._dataset.add_frame(
-                            {**obs_frame, **act_frame, "task": self._task}
-                        )
-                        self._update_recording(
-                            episode_frames=self._recording["episode_frames"] + 1
-                        )
+                        is_waiting = False
+                        with self._status_lock:
+                            if self._recording is not None and self._recording.get("waiting", False):
+                                is_waiting = True
+                                now = time.time()
+                                resume_in = max(0.0, self._waiting_until - now)
+                                self._recording["resume_in"] = resume_in
+                                if resume_in <= 0.0:
+                                    self._recording["waiting"] = False
+                                    is_waiting = False
+                                    logging.info("Resumed recording episode %d (timeout)", self._recording["episodes_saved"] + 1)
+                        if not is_waiting:
+                            obs_proc = robot_observation_processor(obs)
+                            obs_frame = build_dataset_frame(self._dataset.features, obs_proc, prefix=OBS_STR)
+                            act_frame = build_dataset_frame(self._dataset.features, teleop_action, prefix=ACTION)
+                            self._dataset.add_frame(
+                                {**obs_frame, **act_frame, "task": self._task}
+                            )
+                            self._update_recording(
+                                episode_frames=self._recording["episode_frames"] + 1
+                            )
 
                 self.publisher.update(obs, meta=self._status())
 

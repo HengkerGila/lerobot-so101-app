@@ -3,7 +3,7 @@
 All scripts read **`configs/config.yaml`**. This is the only file you should
 need to edit. Below is every field, grouped by section.
 
-The loader (`scripts/_config.py`) reads this YAML, puts `lerobot_src` on the
+The loader (`src/cfg/_config.py`) reads this YAML, puts `lerobot_src` on the
 Python path, and builds the typed LeRobot config objects the scripts consume.
 
 ---
@@ -31,8 +31,8 @@ ports:
 Serial ports for the two arms. Auto-fill with:
 
 ```bash
-python scripts/find_hardware.py --detect-port leader --write
-python scripts/find_hardware.py --detect-port follower --write
+./scripts/port-leader.sh
+./scripts/port-follower.sh
 ```
 
 ## `robot` (follower)
@@ -76,7 +76,7 @@ cameras:
 
 A map of `name → camera settings`. The names become the observation keys in the
 recorded dataset (e.g. `observation.images.front`). Set to `{}` to disable
-cameras. Auto-fill with `python scripts/find_hardware.py --write-cameras`.
+cameras. Auto-fill with `./scripts/cameras.sh`.
 
 | Field | Meaning |
 |-------|---------|
@@ -110,8 +110,8 @@ webui:
   jpeg_quality: 80
 ```
 
-Settings for the web monitor — used by both `scripts/monitor.py` and
-`scripts/teleop.py --dashboard`. All optional — sensible defaults are used if
+Settings for the web monitor — used by both `src/modules/monitor.py` and
+`src/modules/teleop.py --dashboard`. All optional — sensible defaults are used if
 the section is missing.
 
 | Field | Meaning |
@@ -185,7 +185,7 @@ record:
 
 ## How it maps to code
 
-`scripts/_config.py` turns the YAML into LeRobot objects:
+`src/cfg/_config.py` turns the YAML into LeRobot objects:
 
 | YAML section | Built object |
 |--------------|--------------|
@@ -193,8 +193,8 @@ record:
 | `ports.leader` + `teleop` | `SOLeaderTeleopConfig` |
 | `cameras` | `{name: OpenCVCameraConfig}` |
 | `record` | `DatasetRecordConfig` |
-| `webui` | read directly by `scripts/monitor.py`, `scripts/app.py`, and `scripts/teleop.py --dashboard` |
-| `bridge` | read directly by `scripts/app.py`, `scripts/session_server.py`, and `scripts/teleop.py --bridge` |
+| `webui` | read directly by `src/modules/monitor.py`, `src/app/app.py`, and `src/modules/teleop.py --dashboard` |
+| `bridge` | read directly by `src/app/app.py`, `src/app/session_server.py`, and `src/modules/teleop.py --bridge` |
 
 If you need a field not exposed here, add it to the relevant `build_*` function
 in `_config.py` and to this document.

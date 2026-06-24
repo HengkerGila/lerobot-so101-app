@@ -9,10 +9,12 @@ Clone LeRobot, set its path in `config.yaml`, then install:
 ```bash
 git clone https://github.com/huggingface/lerobot.git /path/to/lerobot
 # set lerobot_src: /path/to/lerobot/src in configs/config.yaml
-make install        # creates .venv, installs LeRobot + requirements.txt
+make install ENV=uv        # creates .venv, installs LeRobot + requirements.txt using uv
+# or
+make install ENV=pip       # creates .venv, installs LeRobot + requirements.txt using pip
 ```
 
-`make install` reads `lerobot_src` from `config.yaml` and installs
+`make install` calls `scripts/setup.sh` with the specified environment manager to read `lerobot_src` from `config.yaml` and install
 `<checkout>[hardware,feetech,dataset]` editable (LeRobot 0.5.2 + the SO-101
 extras `hardware`, `feetech`, `dataset`), then the web app deps from
 `requirements.txt` (`fastapi`, `uvicorn`, `pyzmq`) and `PyYAML`. Verify:

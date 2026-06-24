@@ -2,8 +2,6 @@
 # Run `make` or `make help` to see all targets. Everything uses the local .venv,
 # so you never need to activate it or remember script paths.
 
-PY := .venv/bin/python
-
 .DEFAULT_GOAL := help
 
 .PHONY: help install find port-leader port-follower cameras \
@@ -15,46 +13,43 @@ help:  ## Show this help
 		| awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 # --- setup -------------------------------------------------------------------
-install:  ## Create .venv and install dependencies (LeRobot path from config.yaml)
-	python -m venv .venv
-	$(PY) -m pip install --quiet PyYAML
-	$(PY) -m pip install -e "$$($(PY) scripts/_config.py lerobot-root)[hardware,feetech,dataset]"
-	$(PY) -m pip install -r requirements.txt
+install:  ## Create .venv and install dependencies using setup.sh (Usage: make install ENV=uv or ENV=pip)
+	./scripts/setup.sh $(ENV)
 
-find:  ## List detected serial ports and cameras (no changes)
-	$(PY) scripts/find_hardware.py
+find:  ## List detected serial ports and cameras
+	./scripts/find.sh
 
 port-leader:  ## Detect the leader port (unplug/replug) and save it
-	$(PY) scripts/find_hardware.py --detect-port leader --write
+	./scripts/port-leader.sh
 
 port-follower:  ## Detect the follower port (unplug/replug) and save it
-	$(PY) scripts/find_hardware.py --detect-port follower --write
+	./scripts/port-follower.sh
 
 cameras:  ## Detect cameras and save them to the config
-	$(PY) scripts/find_hardware.py --write-cameras
+	./scripts/cameras.sh
 
 calibrate-leader:  ## Calibrate the leader arm
-	$(PY) scripts/calibrate.py --device leader
+	./scripts/calibrate-leader.sh
 
 calibrate-follower:  ## Calibrate the follower arm
-	$(PY) scripts/calibrate.py --device follower
+	./scripts/calibrate-follower.sh
 
 # --- run ---------------------------------------------------------------------
 teleop:  ## Teleoperate (leader drives follower)
-	$(PY) scripts/teleop.py
+	./scripts/teleop.sh
 
 record:  ## Record a dataset (set record.* in config first)
-	$(PY) scripts/record.py
+	./scripts/record.sh
 
 upload:  ## Push a local dataset to the HuggingFace Hub
-	$(PY) scripts/upload_dataset.py
+	./scripts/upload.sh
 
 # --- watch / control in the browser (http://localhost:8000) ------------------
 monitor:  ## Standalone dashboard (run when nothing else owns the arm)
-	$(PY) scripts/monitor.py
+	./scripts/monitor.sh
 
 server:  ## Session server: owns the arm, controllable from the app
-	$(PY) scripts/session_server.py
+	./scripts/server.sh
 
 app:  ## The application UI (pair with `make server` in another terminal)
-	$(PY) scripts/app.py
+	./scripts/app.sh

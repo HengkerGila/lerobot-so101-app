@@ -15,7 +15,7 @@ Keyboard shortcuts during recording:
 
 import logging
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 
@@ -43,7 +43,6 @@ def main():
         f"{record_cfg.dataset.episode_time_s}s → {record_cfg.dataset.repo_id}"
     )
     record(record_cfg)
-
 
 if __name__ == "__main__":
     main()

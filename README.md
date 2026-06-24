@@ -89,36 +89,45 @@ how the data is read back — are in
 
 ## The pieces
 
-| Script | Role |
-|--------|------|
-| `scripts/teleop.py` | Real-time teleoperation (leader → follower) |
-| `scripts/record.py` | Record a dataset with lerobot's recorder |
-| `scripts/session_server.py` | Hardware daemon: idle / teleop / recording, controlled by the app |
-| `scripts/app.py` | The browser application: live view + session control |
-| `scripts/monitor.py` | Standalone live dashboard |
-| `scripts/calibrate.py`, `scripts/find_hardware.py` | One-time setup |
-| `scripts/upload_dataset.py` | Push a dataset to the HuggingFace Hub |
-| `scripts/dashboard.py`, `scripts/bridge.py`, `scripts/_config.py` | Shared internals (web UI, ZMQ bridge, config loader) |
+| Running Script | Makefile Target | Command Executed / File Location | Role |
+|---|---|---|---|
+| `./scripts/find.sh` | `make find` | `src/modules/find_hardware.py` | Detect serial ports and cameras |
+| `./scripts/port-leader.sh` | `make port-leader` | `src/modules/find_hardware.py --detect-port leader --write` | Detect the leader port (unplug/replug) and save it |
+| `./scripts/port-follower.sh`| `make port-follower` | `src/modules/find_hardware.py --detect-port follower --write`| Detect the follower port (unplug/replug) and save it |
+| `./scripts/cameras.sh` | `make cameras` | `src/modules/find_hardware.py --write-cameras` | Detect cameras and save them to the config |
+| `./scripts/calibrate-leader.sh`| `make calibrate-leader`| `src/modules/calibrate.py --device leader` | Calibrate the leader arm |
+| `./scripts/calibrate-follower.sh`| `make calibrate-follower`| `src/modules/calibrate.py --device follower` | Calibrate the follower arm |
+| `./scripts/teleop.sh` | `make teleop` | `src/modules/teleop.py` | Real-time teleoperation (leader → follower) |
+| `./scripts/record.sh` | `make record` | `src/modules/record.py` | Record a dataset with LeRobot's recorder |
+| `./scripts/upload.sh` | `make upload` | `src/modules/upload_dataset.py` | Push a local dataset to the HuggingFace Hub |
+| `./scripts/monitor.sh` | `make monitor` | `src/modules/monitor.py` | Standalone dashboard (run when nothing else owns the arm) |
+| `./scripts/server.sh` | `make server` | `src/app/session_server.py` | Session server: owns the arm, controllable from the app |
+| `./scripts/app.sh` | `make app` | `src/app/app.py` | The application UI (pair with `make server` in another terminal) |
+
+*Shared Internals:* `src/modules/bridge.py` (ZMQ bridge) and `src/cfg/_config.py` (config loader).
 
 ## Installation
 
 This project targets **LeRobot 0.5.2**, which was never published to PyPI (PyPI
 tops out at 0.5.1). You therefore need a **local LeRobot source checkout**, which
-`make install` installs in editable mode. The path to that checkout is set in
+the setup script installs in editable mode. The path to that checkout is set in
 **one place — `lerobot_src` in `configs/config.yaml`** — and nowhere else:
 
 ```bash
-# 1. Clone LeRobot somewhere
+# 1. Clone LeRobot repository (optional)
+# Skip step 1 and step 2 and jump to step 3 to default the LeRobot repository installation to repository_root/lerobot
 git clone https://github.com/huggingface/lerobot.git /path/to/lerobot
 
-# 2. Set lerobot_src in configs/config.yaml to that checkout's src/ dir, e.g.
-#    lerobot_src: /path/to/lerobot/src
+# 2. Set lerobot_src in configs/config.yaml to that checkout's src/ dir (optional) 
+# e.g. lerobot_src: /path/to/lerobot/src
 
-# 3. Create the .venv and install all dependencies (LeRobot + web app + bridge)
-make install
+# 3. Run setup with your preferred environment manager ('uv' or 'pip')
+make install ENV=uv   # using uv (under the hood: ./scripts/setup.sh uv)
+# or
+make install ENV=pip  # using pip (under the hood: ./scripts/setup.sh pip)
 ```
 
-`make install` reads `lerobot_src` from `config.yaml`, then installs:
+The setup script reads `lerobot_src` from `config.yaml`, then installs:
 
 - `<checkout>[hardware,feetech,dataset]` (editable) — LeRobot 0.5.2 plus the
   SO-101 extras (`hardware` → pyserial/pynput, `feetech` → the servo SDK,
@@ -128,7 +137,7 @@ make install
   `pyzmq` (the teleop↔app bridge) and `PyYAML` (the config loader).
 
 So to point at a different checkout, you only edit `lerobot_src` in
-`config.yaml` — the Makefile derives the editable-install path from it. Verify:
+`config.yaml` — the setup script derives the editable-install path from it. Verify:
 
 ```bash
 .venv/bin/python -c "import lerobot; print(lerobot.__version__)"   # 0.5.2
@@ -140,10 +149,14 @@ So to point at a different checkout, you only edit `lerobot_src` in
 ## Quick start
 
 ```bash
-make install                              # create .venv + install deps (see above)
-make port-leader port-follower cameras    # detect hardware → config (once)
-make calibrate-leader calibrate-follower  # calibrate both arms (once)
+# 1. Setup (choose uv or pip)
+make install ENV=uv                       # create .venv + install deps using uv
 
+# 2. Hardware setup (once)
+make port-leader port-follower cameras    # detect hardware → config
+make calibrate-leader calibrate-follower  # calibrate both arms
+
+# 3. Usage
 make teleop                               # drive the follower with the leader
 make record                               # record a dataset (set record.* first)
 

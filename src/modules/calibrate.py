@@ -14,7 +14,7 @@ Usage:
 import argparse
 import logging
 
-import _config
+from cfg import _config
 
 cfg = _config.load()  # loads YAML and puts lerobot on sys.path
 

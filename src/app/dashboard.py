@@ -25,7 +25,6 @@ from typing import Any
 import cv2
 import numpy as np
 
-
 class StateBuffer:
     """Thread-safe latest-observation store shared between a feeder and the web app."""
 
@@ -352,9 +351,16 @@ const BUTTONS = {
               ['Stop recording', {cmd:'stop_recording'}, 'stop', 'idle']],
 };
 
-function buildControls(mode){
+function buildControls(mode, isWaiting){
   controlsEl.innerHTML = '';
-  for(const [label, cmd, cls, optimistic] of (BUTTONS[mode] || [])){
+  let buttons = BUTTONS[mode] || [];
+  if(mode === 'recording' && isWaiting){
+    buttons = [
+      ['Resume', {cmd:'resume_recording'}, 'go', null],
+      ['Stop recording', {cmd:'stop_recording'}, 'stop', 'idle']
+    ];
+  }
+  for(const [label, cmd, cls, optimistic] of buttons){
     const b = document.createElement('button');
     b.className = 'ctl' + (cls ? ' ' + cls : '');
     b.textContent = label;
@@ -428,16 +434,25 @@ function render(s){
   if(sess.loop_hz) sh += ' <span class="meta">'+sess.loop_hz.toFixed(0)+' Hz</span>';
   const rec = sess.recording;
   if(rec){
+    let statusText = 'recording';
+    if(rec.saving) statusText = 'saving…';
+    else if(rec.waiting) statusText = 'waiting…';
+
     sh += '<div class="recinfo">'+
-      (rec.saving ? '<span class="rec-dot"></span>saving…<br>' : '<span class="rec-dot"></span>recording<br>')+
+      '<span class="rec-dot"></span>' + statusText + '<br>'+
       'dataset: <b>'+(rec.repo_id||'?')+'</b><br>'+
-      'episodes saved: <b>'+rec.episodes_saved+' / '+rec.num_episodes+'</b><br>'+
-      'frames this episode: <b>'+rec.episode_frames+'</b></div>';
+      'episodes saved: <b>'+rec.episodes_saved+' / '+rec.num_episodes+'</b><br>';
+    if(rec.waiting){
+      sh += 'resuming in: <b>'+Math.max(0, Math.ceil(rec.resume_in))+'s</b></div>';
+    }else{
+      sh += 'frames this episode: <b>'+rec.episode_frames+'</b></div>';
+    }
   }
   sessionEl.innerHTML = sh;
 
-  const key = mode + '|' + busy;       // only rebuild buttons when they change
-  if(key !== controlsKey){ buildControls(mode); controlsKey = key; }
+  const isWaiting = !!(rec && rec.waiting);
+  const key = mode + '|' + isWaiting + '|' + busy;       // only rebuild buttons when they change
+  if(key !== controlsKey){ buildControls(mode, isWaiting); controlsKey = key; }
 }
 
 // --- live state via SSE (falls back to polling) -----------------------------
