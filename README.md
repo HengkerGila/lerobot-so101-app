@@ -149,7 +149,7 @@ So to point at a different checkout, you only edit `lerobot_src` in
 ## Quick start
 
 ```bash
-# 1. Setup (choose uv or pip)
+# 1. Setup (choose uv or pip), uv is recommended
 make install ENV=uv                       # create .venv + install deps using uv
 
 # 2. Hardware setup (once)
