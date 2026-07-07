@@ -11,12 +11,12 @@ teleop:
   id: so101_leader
   use_degrees: true
 cameras:
-  wrist:
+  cam1:
     index_or_path: /dev/video2
     width: 640
     height: 480
     fps: 30
-  top:
+  cam2:
     index_or_path: /dev/video4
     width: 640
     height: 480
@@ -34,7 +34,7 @@ bridge:
   command_address: tcp://127.0.0.1:5556
   publish_fps: 30
 record:
-  repo_id: huggingfaceuser/repo
+  repo_id: huggingfaceuser/repo # Hugging Face repository ID
   single_task: this is the task prompt
   num_episodes: 10
   episode_time_s: 60

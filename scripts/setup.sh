@@ -48,6 +48,8 @@ if [ ! -d "$LEROBOT_DIR" ] && [ ! -d "./lerobot" ]; then
     if [ "$ENV_TYPE" = "uv" ]; then
         uv venv --python 3.12
         uv pip install -e .
+        uv pip install -e "${LEROBOT_DIR:-"./lerobot"}[feetech, hardware, dataset]"
+        uv pip install wandb
     else
         python3 -m venv .venv
         .venv/bin/pip install -e .
